@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Use environment variable or relative path for Vercel deployment
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 // Function to get personalized travel checklist
 export const getTravelChecklist = async (data) => {

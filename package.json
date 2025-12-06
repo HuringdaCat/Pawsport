@@ -1,0 +1,17 @@
+{
+  "name": "pawsport-serverless",
+  "version": "1.0.0",
+  "description": "Pawsport serverless backend on Vercel",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "cd client && npm run build"
+  },
+  "dependencies": {
+    "@vercel/node": "^3.0.0",
+    "axios": "^1.13.2",
+    "typescript": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.0"
+  }
+}

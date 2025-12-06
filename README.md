@@ -1,6 +1,8 @@
 # 🐾 Pawsport – About the Project
 For every pet who deserves a smooth journey—and a friend to boop at the end.
 
+> **🚀 Now running serverless on Vercel!** See [DEPLOYMENT.md](DEPLOYMENT.md) for migration details.
+
 ## Inspiration
 Moving or traveling across borders is stressful enough — doing it with pets can feel overwhelming. Regulations vary widely, airlines have different rules, documentation is confusing, and reliable guidance is scattered across the internet.
 
@@ -30,67 +32,96 @@ Together, these features make global pet mobility easier, safer, and more connec
 ---
 
 ## How we built it
-- Implemented a lightweight web application with a frontend interface and backend API  
-- Integrated an LLM to power the travel-rule explanation engine, documentation summarizer, and cultural guidance  
-- Built a basic matching module recommending nearby or route-related pet connections  
-- Created a simple community feed for Nose Booper using seeded sample profiles  
-- Designed a clean, user-focused interface to support clarity during stressful relocation planning
+- **Frontend**: React 17 + TypeScript SPA with React Router v5
+- **Backend**: Converted from Express monolith to Vercel serverless functions
+- **Architecture**: Serverless API functions in `/api`, shared services in `/lib`
+- **LLM Integration**: Powers travel-rule explanation engine, documentation summarizer, and cultural guidance  
+- **Matching Module**: Basic recommendation engine for nearby or route-related pet connections  
+- **Community Feed**: Nose Booper using seeded sample profiles  
+- **Deployment**: Vercel with automatic CI/CD from GitHub
 
 ---
 
 ## Project Structure
 ```
 Pawsport
-├── client
-│   ├── public
-│   │   └── index.html
-│   ├── src
-│   │   ├── components
-│   │   │   ├── TravelAssistant
+├── api/                      # Serverless API functions
+│   ├── travel/
+│   │   ├── checklist.ts      # POST /api/travel/checklist
+│   │   ├── regulations.ts    # GET /api/travel/regulations
+│   │   └── documents.ts      # POST /api/travel/documents
+│   └── community/
+│       └── posts.ts          # GET/POST/DELETE /api/community/posts
+├── lib/                      # Shared business logic
+│   ├── services/
+│   │   ├── llmService.ts
+│   │   ├── regulationService.ts
+│   │   ├── communityService.ts
+│   │   └── matchingService.ts
+│   └── types/
+│       └── index.ts
+├── client/                   # React frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── TravelAssistant/
 │   │   │   │   ├── TravelChecklist.tsx
 │   │   │   │   ├── RegulationSummary.tsx
 │   │   │   │   └── DocumentExplainer.tsx
-│   │   │   ├── NoseBooper
+│   │   │   ├── NoseBooper/
 │   │   │   │   ├── CommunityFeed.tsx
 │   │   │   │   ├── PetProfile.tsx
 │   │   │   │   └── MatchingModule.tsx
-│   │   │   └── shared
+│   │   │   └── shared/
 │   │   │       ├── Header.tsx
 │   │   │       └── Footer.tsx
-│   │   ├── pages
+│   │   ├── pages/
 │   │   │   ├── Home.tsx
 │   │   │   ├── TravelPlanner.tsx
 │   │   │   └── Community.tsx
-│   │   ├── services
-│   │   │   └── api.ts
-│   │   ├── types
-│   │   │   └── index.ts
-│   │   ├── App.tsx
-│   │   └── index.tsx
-│   ├── package.json
-│   └── tsconfig.json
-├── server
-│   ├── src
-│   │   ├── controllers
-│   │   │   ├── travelController.ts
-│   │   │   ├── communityController.ts
-│   │   │   └── llmController.ts
-│   │   ├── routes
-│   │   │   ├── travelRoutes.ts
-│   │   │   ├── communityRoutes.ts
-│   │   │   └── index.ts
-│   │   ├── services
-│   │   │   ├── llmService.ts
-│   │   │   ├── matchingService.ts
-│   │   │   └── regulationService.ts
-│   │   ├── middleware
-│   │   │   ├── errorHandler.ts
-│   │   │   └── validation.ts
-│   │   ├── types
-│   │   │   └── index.ts
-│   │   ├── app.ts
-│   │   └── server.ts
-│   ├── package.json
-│   └── tsconfig.json
-└── README.md
+│   │   ├── services/
+│   │   │   └── api.js
+│   │   └── types/
+│   │       └── index.ts
+│   └── package.json
+├── server/                   # Legacy Express server (preserved for reference)
+├── vercel.json               # Vercel deployment configuration
+├── package.json              # Root dependencies for API functions
+└── DEPLOYMENT.md             # Serverless migration guide
 ```
+
+---
+
+## Quick Start
+
+### Local Development
+```bash
+# Install dependencies
+npm install
+cd client && npm install && cd ..
+
+# Run with Vercel CLI (recommended)
+npm install -g vercel
+vercel dev
+
+# Access app at http://localhost:3000
+```
+
+### Deploy to Vercel
+```bash
+# Via CLI
+vercel --prod
+
+# Or connect GitHub repo to Vercel dashboard for auto-deployment
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+
+---
+
+## Environment Variables
+Create `.env` file at root:
+```
+LLM_API_URL=https://your-llm-api.com/endpoint
+```
+
+---
