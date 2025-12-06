@@ -1,6 +1,6 @@
 import { RegulationData, RegulationSummary } from '../types';
 
-class RegulationService {
+export class RegulationService {
     private regulations: RegulationData[];
 
     constructor() {
@@ -29,5 +29,3 @@ class RegulationService {
         return this.regulations;
     }
 }
-
-export default new RegulationService();

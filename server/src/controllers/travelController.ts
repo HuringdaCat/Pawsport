@@ -14,7 +14,7 @@ class TravelController {
     public async getTravelChecklist(req: Request, res: Response): Promise<void> {
         try {
             const { origin, destination, species, breed, vaccinationStatus } = req.body;
-            const checklist = await this.regulationService.generateChecklist(origin, destination, species, breed, vaccinationStatus);
+            const checklist = await this.llmService.getTravelChecklist({ origin, destination, species, breed, vaccinationStatus });
             res.status(200).json(checklist);
         } catch (error) {
             res.status(500).json({ message: 'Error generating travel checklist', error });
@@ -23,8 +23,8 @@ class TravelController {
 
     public async getRegulationSummary(req: Request, res: Response): Promise<void> {
         try {
-            const { origin, destination } = req.params;
-            const summary = await this.regulationService.getRegulationSummary(origin, destination);
+            const { country } = req.params;
+            const summary = this.regulationService.getRegulationSummary(country);
             res.status(200).json(summary);
         } catch (error) {
             res.status(500).json({ message: 'Error fetching regulation summary', error });

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api'; // Adjust the base URL as needed
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // Function to get personalized travel checklist
 export const getTravelChecklist = async (data) => {
@@ -50,4 +50,29 @@ export const createCommunityPost = async (post) => {
     } catch (error) {
         throw new Error('Error creating community post: ' + error.message);
     }
+};
+
+// Function to get matching pet owners (mock for now)
+export const getMatchingPetOwners = async () => {
+    // Mock data since server endpoint doesn't exist yet
+    return {
+        data: [
+            {
+                id: '1',
+                name: 'Sarah Johnson',
+                location: 'New York',
+                destination: 'Paris',
+                petType: 'Dog',
+                travelDate: '2024-03-15'
+            },
+            {
+                id: '2',
+                name: 'Mike Chen',
+                location: 'Los Angeles',
+                destination: 'Tokyo',
+                petType: 'Cat',
+                travelDate: '2024-03-20'
+            }
+        ]
+    };
 };

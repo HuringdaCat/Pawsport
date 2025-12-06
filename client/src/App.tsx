@@ -5,6 +5,7 @@ import Footer from './components/shared/Footer';
 import Home from './pages/Home';
 import TravelPlanner from './pages/TravelPlanner';
 import Community from './pages/Community';
+import './App.css';
 
 const App: React.FC = () => {
   return (

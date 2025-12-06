@@ -1,15 +1,15 @@
 import { Router } from 'express';
-import { getTravelChecklist, getRegulationSummary, getDocumentExplanation } from '../controllers/travelController';
+import travelController from '../controllers/travelController';
 
 const router = Router();
 
 // Route to get personalized travel checklist
-router.get('/checklist', getTravelChecklist);
+router.post('/checklist', travelController.getTravelChecklist.bind(travelController));
 
 // Route to get regulation summary
-router.get('/regulations', getRegulationSummary);
+router.get('/regulations/:country', travelController.getRegulationSummary.bind(travelController));
 
 // Route to get document explanation
-router.get('/documents', getDocumentExplanation);
+router.post('/documents', travelController.explainDocuments.bind(travelController));
 
 export default router;

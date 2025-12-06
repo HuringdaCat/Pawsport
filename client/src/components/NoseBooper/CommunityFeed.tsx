@@ -1,14 +1,15 @@
 import React from 'react';
+import { CommunityPost } from '../../types';
+import { getCommunityPosts } from '../../services/api';
 
 const CommunityFeed: React.FC = () => {
-    const [posts, setPosts] = React.useState([]);
+    const [posts, setPosts] = React.useState<CommunityPost[]>([]);
 
     React.useEffect(() => {
         // Fetch community posts from the API
         const fetchPosts = async () => {
             try {
-                const response = await fetch('/api/community/posts');
-                const data = await response.json();
+                const data = await getCommunityPosts();
                 setPosts(data);
             } catch (error) {
                 console.error('Error fetching community posts:', error);
@@ -27,9 +28,9 @@ const CommunityFeed: React.FC = () => {
                 <ul>
                     {posts.map((post) => (
                         <li key={post.id}>
-                            <h3>{post.title}</h3>
                             <p>{post.content}</p>
-                            <p><strong>Posted by:</strong> {post.author}</p>
+                            <p><strong>Posted by:</strong> {post.authorId}</p>
+                            <p><small>{new Date(post.createdAt).toLocaleDateString()}</small></p>
                         </li>
                     ))}
                 </ul>
