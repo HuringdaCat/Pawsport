@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const LLM_API_URL = 'https://api.example.com/llm'; // Replace with actual LLM API URL
+const LLM_API_URL = process.env.LLM_API_URL || 'https://api.example.com/llm';
 
 export class LLMService {
     public async getTravelChecklist(params: any): Promise<any> {

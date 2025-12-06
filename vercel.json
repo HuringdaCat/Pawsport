@@ -1,9 +1,7 @@
 {
-  "version": 2,
   "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "client/build",
-  "installCommand": "npm install && cd client && npm install",
-  "framework": null,
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -13,8 +11,5 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "LLM_API_URL": "@llm_api_url"
-  }
+  ]
 }
