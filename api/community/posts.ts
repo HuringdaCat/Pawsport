@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { CommunityService } from 'lib/services/communityService';
+import { CommunityService } from '../../lib/services/communityService';
 
 const communityService = new CommunityService();
 

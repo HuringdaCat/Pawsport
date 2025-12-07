@@ -22,7 +22,7 @@ export interface RegulationSummary {
 
 export interface CommunityPost {
     id: string;
-    authorId: string;
+    userId: string;
     content: string;
     createdAt: Date;
 }

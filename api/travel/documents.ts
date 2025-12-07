@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { LLMService } from 'lib/services/llmService';
+import { LLMService } from '../../lib/services/llmService';
 
 const llmService = new LLMService();
 

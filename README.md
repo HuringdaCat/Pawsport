@@ -93,18 +93,90 @@ Pawsport
 
 ## Quick Start
 
-### Local Development
-```bash
-# Install dependencies
-npm install
-cd client && npm install && cd ..
+### Prerequisites
+- **Node.js** (v14 or higher)
+- **npm** (comes with Node.js)
+- **Git** (optional, for cloning)
 
-# Run with Vercel CLI (recommended)
+### Local Development
+
+#### Option 1: Run with Vercel CLI (Serverless Mode - Recommended)
+This simulates the production serverless environment locally:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/Pawsport.git
+cd Pawsport
+
+# 2. Install root dependencies (API functions)
+npm install
+
+# 3. Install client dependencies
+cd client
+npm install
+cd ..
+
+# 4. Install Vercel CLI globally
 npm install -g vercel
+
+# 5. Start development server
 vercel dev
 
-# Access app at http://localhost:3000
+# 6. Open browser to http://localhost:3000
 ```
+
+The Vercel CLI will:
+- Serve the React app on port 3000
+- Run API functions on `/api` routes
+- Hot-reload on code changes
+
+#### Option 2: Run Client and Server Separately (Legacy Mode)
+For debugging or development without Vercel CLI:
+
+**Terminal 1 - Start Backend Server:**
+```bash
+cd server
+npm install
+npm run dev
+# Server runs on http://localhost:5000
+```
+
+**Terminal 2 - Start Frontend Client:**
+```bash
+cd client
+npm install
+npm start
+# Client runs on http://localhost:3000
+```
+
+The client will proxy API requests to `http://localhost:5000/api`.
+
+### Environment Variables
+Create a `.env` file at the project root:
+```bash
+# Required for LLM-powered features
+LLM_API_URL=https://your-llm-api.com/endpoint
+
+# Optional configurations
+# PORT=5000
+```
+
+> **Note:** The app works without an LLM API configured (uses mock responses), but personalized travel features require a valid LLM endpoint.
+
+### Available Scripts
+
+**Root Level:**
+- `npm run build` - Build client for production
+
+**Client (`client/`):**
+- `npm start` - Start React development server (port 3000)
+- `npm run build` - Create production build
+- `npm test` - Run client tests
+
+**Server (`server/`):**
+- `npm run dev` - Start Express server with hot reload (port 5000)
+- `npm run build` - Compile TypeScript to JavaScript
+- `npm start` - Start production server
 
 ### Deploy to Vercel
 ```bash
@@ -114,14 +186,6 @@ vercel --prod
 # Or connect GitHub repo to Vercel dashboard for auto-deployment
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
-
----
-
-## Environment Variables
-Create `.env` file at root:
-```
-LLM_API_URL=https://your-llm-api.com/endpoint
-```
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 ---

@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { RegulationService } from 'lib/services/regulationService';
+import { RegulationService } from '../../lib/services/regulationService';
 
 const regulationService = new RegulationService();
 

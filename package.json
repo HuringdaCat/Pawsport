@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Pawsport serverless backend on Vercel",
   "scripts": {
-    "dev": "vercel dev",
     "build": "cd client && npm run build"
   },
   "dependencies": {

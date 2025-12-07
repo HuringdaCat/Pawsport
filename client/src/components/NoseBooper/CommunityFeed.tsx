@@ -25,15 +25,17 @@ const CommunityFeed: React.FC = () => {
             {posts.length === 0 ? (
                 <p>No posts available. Be the first to share!</p>
             ) : (
-                <ul>
+                <div className="posts-gallery">
                     {posts.map((post) => (
-                        <li key={post.id}>
-                            <p>{post.content}</p>
-                            <p><strong>Posted by:</strong> {post.authorId}</p>
-                            <p><small>{new Date(post.createdAt).toLocaleDateString()}</small></p>
-                        </li>
+                        <div key={post.id} className="post-card">
+                            <div className="post-content">{post.content}</div>
+                            <div className="post-meta">
+                                <span className="post-author">{post.userId}</span>
+                                <span className="post-date">{new Date(post.createdAt).toLocaleDateString()}</span>
+                            </div>
+                        </div>
                     ))}
-                </ul>
+                </div>
             )}
         </div>
     );
