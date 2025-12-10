@@ -188,3 +188,52 @@ Common issues after this fix:
 **Action**: Commit, push, and deploy  
 
 **You're ready to go! 🚀**
+
+---
+
+# Layout Fix - Navigation Bar Issue (December 10, 2025)
+
+## Problem
+The navigation bar was appearing on the right half of the page with content and background on the left.
+
+## Root Cause
+Old CSS styles in `App.css` were conflicting with new Tailwind CSS classes:
+- `header nav { display: inline-block; float: right; }` was causing layout issues
+- Legacy CSS had higher specificity than Tailwind utility classes
+- Mix of old CSS positioning and new Tailwind flexbox
+
+## Solution
+1. **Removed old header styles from App.css**
+   - Deleted all `header`, `header nav`, `header h1` styles
+   - Kept only necessary styles for other pages
+
+2. **Removed App.css import from App.tsx**
+   - Header now uses pure Tailwind CSS
+   - No CSS conflicts
+
+## Files Changed
+- `client/src/App.css` - Removed header styles
+- `client/src/App.tsx` - Removed `import './App.css'`
+
+## Result
+✅ Navigation displays correctly with:
+- Logo on the left
+- Nav links centered/right
+- Get Started button on the right
+- Full-width white background
+- Sticky positioning working
+
+## Testing
+```bash
+cd client
+npm run build  # Should compile successfully
+npm start      # Dev server should show correct layout
+```
+
+## Prevention
+When integrating Tailwind CSS with existing projects:
+1. Audit existing CSS files for conflicts
+2. Remove or scope legacy styles
+3. Prefer Tailwind utilities over custom CSS
+4. Use CSS specificity tools to debug conflicts
+5. Consider removing App.css entirely if not needed

@@ -5,7 +5,7 @@ import Footer from './components/shared/Footer';
 import Home from './pages/Home';
 import TravelPlanner from './pages/TravelPlanner';
 import Community from './pages/Community';
-import './App.css';
+import ComponentShowcase from './pages/ComponentShowcase';
 
 const App: React.FC = () => {
   return (
@@ -15,6 +15,7 @@ const App: React.FC = () => {
         <Route path="/" exact component={Home} />
         <Route path="/travel-planner" component={TravelPlanner} />
         <Route path="/community" component={Community} />
+        <Route path="/showcase" component={ComponentShowcase} />
       </Switch>
       <Footer />
     </Router>
