@@ -184,12 +184,17 @@
     font-weight: 500;
 }
 
-.quick-action-btn:hover {
+.quick-action-btn:hover:not(:disabled) {
     background: #7c3aed;
     color: white;
     border-color: #7c3aed;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.quick-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .action-icon {
@@ -229,6 +234,11 @@
     font-family: inherit;
     max-height: 120px;
     line-height: 1.5;
+}
+
+.chat-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .send-button {
