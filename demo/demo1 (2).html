@@ -1,0 +1,535 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawsport - AI Pet Travel Assistant Demo</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: { 50: '#fff7ed', 100: '#ffedd5', 400: '#fb923c', 500: '#f97316', 600: '#ea580c' },
+                            pink: { 50: '#fdf2f8', 100: '#fce7f3', 400: '#f472b6', 500: '#ec4899' },
+                            purple: { 50: '#faf5ff', 400: '#c084fc', 500: '#a855f7' },
+                            yellow: { 50: '#fefce8' },
+                            blue: { 50: '#eff6ff' }
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar hide */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* Cursor */
+        #cursor {
+            pointer-events: none;
+            z-index: 9999;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+    </style>
+</head>
+<body class="overflow-hidden bg-gray-50 text-slate-800">
+
+    <!-- Audio -->
+    <audio id="bg-music" src="https://raw.githubusercontent.com/boringresearch/1-min-demo/refs/heads/main/media/demo.mp3" loop preload="auto"></audio>
+
+    <!-- Scene 0: Start Screen Overlay -->
+    <div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-brand-pink-50 via-brand-orange-50 to-brand-yellow-50">
+        <div class="text-center space-y-8">
+            <div class="flex items-center justify-center gap-4 mb-4 animate-bounce">
+                <div class="w-20 h-20 bg-gradient-to-br from-brand-orange-400 to-brand-pink-400 rounded-3xl flex items-center justify-center shadow-2xl transform -rotate-6">
+                    <i data-lucide="paw-print" class="w-10 h-10 text-white"></i>
+                </div>
+            </div>
+            <h1 class="text-6xl font-extrabold bg-gradient-to-r from-brand-orange-600 to-brand-pink-500 bg-clip-text text-transparent">
+                Pawsport
+            </h1>
+            <p class="text-xl text-gray-600">AI-Powered Pet Travel Assistant</p>
+            
+            <button id="start-btn" class="group relative px-8 py-4 bg-gradient-to-r from-brand-orange-400 to-brand-pink-400 text-white text-xl font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 overflow-hidden">
+                <span class="relative z-10 flex items-center gap-2">
+                    Start Demo <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                </span>
+                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Subtitle Overlay -->
+    <div id="subtitle-overlay" class="fixed bottom-12 left-0 right-0 z-40 flex justify-center pointer-events-none opacity-0">
+        <div class="bg-black/70 backdrop-blur-md text-white px-8 py-4 rounded-full text-xl font-medium shadow-2xl transform translate-y-4">
+            <span id="subtitle-text">Welcome to Pawsport</span>
+        </div>
+    </div>
+
+    <!-- Main Stage -->
+    <div id="stage" class="relative w-full h-screen overflow-hidden bg-white">
+        
+        <!-- Scene 1: The Problem -->
+        <div id="scene-problem" class="absolute inset-0 z-30 bg-slate-900 flex items-center justify-center opacity-0 pointer-events-none">
+            <div class="relative w-full max-w-4xl h-full flex flex-col items-center justify-center">
+                <!-- Central Pet Image -->
+                <div id="confused-pet" class="relative z-10 w-64 h-64 bg-white rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                    <span class="text-9xl">🐶</span>
+                    <div class="absolute -top-4 -right-4 text-6xl animate-pulse">❓</div>
+                </div>
+
+                <!-- Chaos Bubbles -->
+                <div class="chaos-bubble absolute top-1/4 left-1/4 bg-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg transform -rotate-12 opacity-0">Quarantine? 🏥</div>
+                <div class="chaos-bubble absolute top-1/3 right-1/4 bg-orange-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg transform rotate-6 opacity-0">Vaccines? 💉</div>
+                <div class="chaos-bubble absolute bottom-1/3 left-1/3 bg-purple-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg transform -rotate-3 opacity-0">Airline Rules? ✈️</div>
+                <div class="chaos-bubble absolute bottom-1/4 right-1/3 bg-pink-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg transform rotate-12 opacity-0">Paperwork? 📄</div>
+                <div class="chaos-bubble absolute top-1/2 right-10 bg-red-600 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-xl transform -rotate-6 opacity-0">HELP! 😱</div>
+            </div>
+        </div>
+
+        <!-- Scene 2: The Solution (Hero) -->
+        <div id="scene-hero" class="absolute inset-0 z-20 bg-gradient-to-br from-brand-pink-50 via-brand-orange-50 to-brand-yellow-50 opacity-0">
+            <!-- Header -->
+            <header class="absolute top-0 w-full p-6 flex justify-between items-center max-w-7xl mx-auto left-0 right-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-brand-orange-400 to-brand-pink-400 rounded-xl flex items-center justify-center text-white">
+                        <i data-lucide="paw-print"></i>
+                    </div>
+                    <span class="text-2xl font-bold bg-gradient-to-r from-brand-orange-600 to-brand-pink-600 bg-clip-text text-transparent">Pawsport</span>
+                </div>
+                <button class="px-6 py-2 bg-gradient-to-r from-brand-orange-400 to-brand-pink-400 text-white rounded-full font-medium shadow-lg">Get Started</button>
+            </header>
+
+            <!-- Hero Content -->
+            <div class="h-full flex items-center justify-center max-w-7xl mx-auto px-6">
+                <div class="grid grid-cols-2 gap-12 items-center w-full">
+                    <div id="hero-text" class="space-y-8">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-brand-orange-100 text-brand-orange-700 rounded-full text-sm font-medium border border-brand-orange-200">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i> AI-Powered Pet Travel
+                        </div>
+                        <h1 class="text-7xl font-bold leading-tight text-slate-900">
+                            Plan Your Pet's <br/>
+                            <span class="bg-gradient-to-r from-brand-orange-500 to-brand-pink-500 bg-clip-text text-transparent">Perfect Journey</span>
+                        </h1>
+                        <p class="text-xl text-gray-600 max-w-lg">
+                            Get personalized travel plans with AI and share your pet's adventures with our community! 🐾
+                        </p>
+                        <div class="flex gap-4 pt-4">
+                            <button id="hero-cta" class="px-8 py-4 bg-gradient-to-r from-brand-orange-400 to-brand-pink-400 text-white rounded-full font-bold text-lg shadow-xl flex items-center gap-2">
+                                Start Your Journey <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="hero-image" class="relative">
+                        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border-4 border-brand-orange-100 transform rotate-2">
+                            <div class="aspect-[4/3] bg-brand-blue-50 rounded-2xl flex items-center justify-center overflow-hidden relative">
+                                <div class="absolute inset-0 bg-gradient-to-br from-blue-100 to-purple-100 opacity-50"></div>
+                                <span class="text-9xl relative z-10 drop-shadow-xl">🐱✈️</span>
+                            </div>
+                        </div>
+                        <!-- Floating Stats -->
+                        <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3 animate-bounce" style="animation-duration: 3s;">
+                            <div class="w-12 h-12 bg-brand-orange-100 rounded-full flex items-center justify-center text-brand-orange-600">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-lg">10,000+</div>
+                                <div class="text-xs text-gray-500">Happy Pets</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 3: The Magic (Travel Planner) -->
+        <div id="scene-planner" class="absolute inset-0 z-20 bg-gradient-to-br from-brand-purple-50 to-white opacity-0 flex items-center justify-center">
+            <div class="w-full max-w-4xl h-[80vh] bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col transform scale-95">
+                <!-- Chat Header -->
+                <div class="bg-gradient-to-r from-brand-purple-500 to-brand-purple-400 p-6 flex items-center gap-4 text-white">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">🤖</div>
+                    <div>
+                        <h3 class="font-bold text-lg">AI Travel Assistant</h3>
+                        <div class="flex items-center gap-2 text-sm opacity-90">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span> Online
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div id="chat-messages" class="flex-1 bg-slate-50 p-6 overflow-y-auto space-y-6">
+                    <!-- Initial AI Message -->
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-brand-purple-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">🤖</div>
+                        <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-md text-gray-700">
+                            Hi! I'm your AI travel assistant. Where are you and your pet planning to go?
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="p-4 bg-white border-t border-gray-100">
+                    <div class="flex gap-3 mb-4 overflow-x-auto pb-2 no-scrollbar">
+                        <button id="action-regulations" class="flex items-center gap-2 px-4 py-2 bg-brand-purple-50 text-brand-purple-600 rounded-full text-sm font-medium hover:bg-brand-purple-100 transition-colors whitespace-nowrap border border-brand-purple-100">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> Regulations
+                        </button>
+                        <button class="flex items-center gap-2 px-4 py-2 bg-brand-purple-50 text-brand-purple-600 rounded-full text-sm font-medium hover:bg-brand-purple-100 transition-colors whitespace-nowrap border border-brand-purple-100">
+                            <i data-lucide="check-square" class="w-4 h-4"></i> Checklist
+                        </button>
+                    </div>
+                    <!-- Input Area -->
+                    <div class="relative">
+                        <input type="text" placeholder="Ask me anything..." class="w-full pl-6 pr-12 py-4 bg-gray-50 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-purple-400">
+                        <button class="absolute right-2 top-2 p-2 bg-brand-purple-500 text-white rounded-full shadow-md">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 4: The Connection (Community) -->
+        <div id="scene-community" class="absolute inset-0 z-20 bg-gray-50 opacity-0 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 py-12 h-full flex flex-col justify-center">
+                <div class="text-center mb-12">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-brand-pink-50 border-2 border-brand-pink-400 rounded-full text-brand-pink-600 font-bold mb-4">
+                        <i data-lucide="heart" class="w-4 h-4"></i> Community
+                    </span>
+                    <h2 class="text-5xl font-bold text-gray-900">Connect with Pet Parents</h2>
+                </div>
+                
+                <!-- Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 perspective-1000" id="community-grid">
+                    <!-- Post 1 -->
+                    <div class="post-card bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:border-brand-purple-400 transform hover:-translate-y-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-brand-orange-100 rounded-full flex items-center justify-center text-xl">👩‍🦰</div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Sarah & Max</h4>
+                                    <p class="text-xs text-gray-500">2 hours ago</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-600">London ✈️ Sydney</span>
+                        </div>
+                        <div class="h-40 bg-gray-100 rounded-2xl mb-4 overflow-hidden relative group">
+                            <div class="absolute inset-0 bg-gradient-to-br from-brand-orange-200 to-brand-pink-200 flex items-center justify-center text-4xl">
+                                🐕
+                            </div>
+                            <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold shadow-sm">
+                                Golden Retriever
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Max loved his first international flight! The pet relief areas at Heathrow were super clean.</p>
+                        <div class="flex items-center gap-4 text-gray-400 text-sm border-t pt-4">
+                            <div class="flex items-center gap-1 hover:text-brand-pink-500 cursor-pointer transition-colors">
+                                <i data-lucide="heart" class="w-4 h-4"></i> 234
+                            </div>
+                            <div class="flex items-center gap-1 hover:text-brand-purple-500 cursor-pointer transition-colors">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i> 18
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Post 2 -->
+                    <div class="post-card bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:border-brand-purple-400 transform hover:-translate-y-2 mt-0 md:mt-12">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-brand-purple-100 rounded-full flex items-center justify-center text-xl">👨</div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Mike & Luna</h4>
+                                    <p class="text-xs text-gray-500">5 hours ago</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-600">NYC ✈️ Tokyo</span>
+                        </div>
+                        <div class="h-40 bg-gray-100 rounded-2xl mb-4 overflow-hidden relative">
+                             <div class="absolute inset-0 bg-gradient-to-br from-brand-purple-200 to-brand-blue-200 flex items-center justify-center text-4xl">
+                                🐈
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Arrived in Tokyo! The quarantine process was smoother than expected thanks to the checklist.</p>
+                        <div class="flex items-center gap-4 text-gray-400 text-sm border-t pt-4">
+                            <div class="flex items-center gap-1 hover:text-brand-pink-500 cursor-pointer transition-colors">
+                                <i data-lucide="heart" class="w-4 h-4"></i> 189
+                            </div>
+                            <div class="flex items-center gap-1 hover:text-brand-purple-500 cursor-pointer transition-colors">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i> 42
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Post 3 -->
+                    <div class="post-card bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:border-brand-purple-400 transform hover:-translate-y-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-brand-pink-100 rounded-full flex items-center justify-center text-xl">👩</div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Elena & Bella</h4>
+                                    <p class="text-xs text-gray-500">1 day ago</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-600">Paris ✈️ Berlin</span>
+                        </div>
+                        <div class="h-40 bg-gray-100 rounded-2xl mb-4 overflow-hidden relative">
+                            <div class="absolute inset-0 bg-gradient-to-br from-brand-pink-200 to-brand-yellow-200 flex items-center justify-center text-4xl">
+                                🐩
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Train travel across Europe with pets is amazing! Just did Paris-Berlin with my Frenchie.</p>
+                        <div class="flex items-center gap-4 text-gray-400 text-sm border-t pt-4">
+                            <div class="flex items-center gap-1 hover:text-brand-pink-500 cursor-pointer transition-colors">
+                                <i data-lucide="heart" class="w-4 h-4"></i> 312
+                            </div>
+                            <div class="flex items-center gap-1 hover:text-brand-purple-500 cursor-pointer transition-colors">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i> 24
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 5: Infinite Ending -->
+        <div id="scene-infinite" class="absolute inset-0 z-10 bg-white opacity-0 flex items-center justify-center overflow-hidden">
+            <div id="infinite-grid" class="grid grid-cols-6 gap-4 w-[200vw] h-[200vh] opacity-30 transform scale-150 origin-center">
+                <!-- Generated by JS -->
+            </div>
+            <div class="absolute z-20 text-center bg-white/80 backdrop-blur-xl p-12 rounded-[3rem] shadow-2xl border border-white/50">
+                <div class="w-24 h-24 bg-gradient-to-br from-brand-orange-400 to-brand-pink-400 rounded-3xl flex items-center justify-center shadow-lg mx-auto mb-6 transform -rotate-12">
+                    <i data-lucide="paw-print" class="w-12 h-12 text-white"></i>
+                </div>
+                <h1 class="text-6xl font-extrabold bg-gradient-to-r from-brand-orange-600 to-brand-pink-600 bg-clip-text text-transparent mb-4">
+                    Pawsport
+                </h1>
+                <p class="text-2xl text-gray-600 font-medium">Smooth Journeys for Every Pet</p>
+            </div>
+        </div>
+
+        <!-- Fake Cursor -->
+        <div id="cursor" class="fixed top-0 left-0 w-8 h-8 pointer-events-none z-50 opacity-0">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 28L12 4L26 18L17 18L12 28Z" fill="black" stroke="white" stroke-width="2"/>
+            </svg>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const bgMusic = document.getElementById('bg-music');
+        const subtitleOverlay = document.getElementById('subtitle-overlay');
+        const subtitleText = document.getElementById('subtitle-text');
+        const cursor = document.getElementById('cursor');
+
+        // Helper to update subtitle
+        const showSubtitle = (text) => {
+            subtitleText.textContent = text;
+            gsap.to(subtitleOverlay, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" });
+        };
+        
+        const hideSubtitle = () => {
+            gsap.to(subtitleOverlay, { opacity: 0, y: 20, duration: 0.5, ease: "power2.in" });
+        };
+
+        // Populate Infinite Grid
+        const infiniteGrid = document.getElementById('infinite-grid');
+        const emojis = ['🐶', '🐱', '🐰', '🦜', '🐹', '🐢', '🐕', '🐈', '🐩'];
+        for(let i=0; i<48; i++) {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-100 rounded-xl flex items-center justify-center text-4xl aspect-square';
+            div.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+            infiniteGrid.appendChild(div);
+        }
+
+        // Main Timeline
+        const tl = gsap.timeline({ paused: true });
+
+        // --- Animation Sequence ---
+
+        // 0. Initial State
+        tl.set("#scene-problem", { opacity: 1, zIndex: 30 })
+          .set("#cursor", { x: "50vw", y: "110vh", opacity: 1 }) // Start cursor off-screen
+
+        // 1. Scene 1: The Problem (0s - 4s)
+        .call(() => showSubtitle("Moving with pets is complicated."))
+        .fromTo("#confused-pet", { scale: 0, rotation: -180 }, { scale: 1, rotation: 0, duration: 0.8, ease: "back.out(1.7)" })
+        .to(".chaos-bubble", { 
+            opacity: 1, 
+            scale: 1, 
+            duration: 0.4, 
+            stagger: 0.3, 
+            ease: "elastic.out(1, 0.5)" 
+        })
+        .to("#confused-pet", { 
+            scale: 0.9, 
+            duration: 0.1, 
+            yoyo: true, 
+            repeat: 5 
+        }, "<") // Shake pet while bubbles appear
+        .to("#scene-problem", { opacity: 0, duration: 0.8, ease: "power2.inOut" }, "+=0.5")
+        .call(() => hideSubtitle())
+
+        // 2. Scene 2: The Solution (4s - 8s)
+        .call(() => showSubtitle("Meet Pawsport. Your AI Travel Assistant."))
+        .to("#scene-hero", { opacity: 1, duration: 0.8 }, "<")
+        .from("#hero-text > *", { y: 50, opacity: 0, stagger: 0.1, duration: 0.8, ease: "power3.out" }, "<+0.2")
+        .from("#hero-image", { x: 50, opacity: 0, duration: 0.8, ease: "power3.out" }, "<")
+        
+        // Cursor interaction on Hero
+        .to("#cursor", { y: "70vh", x: "24vw", duration: 1, ease: "power2.out" }) 
+        .to("#hero-cta", { scale: 1.05, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)", duration: 0.2 }) // Hover effect
+        .to("#hero-cta", { scale: 0.95, duration: 0.1 }) // Click press
+        .to("#hero-cta", { scale: 1, duration: 0.1 }) // Click release
+        .call(() => hideSubtitle(), null, "+=0.5")
+
+        // 3. Scene 3: The Magic (8s - 14s)
+        .to("#scene-hero", { y: -window.innerHeight, duration: 0.8, ease: "power3.inOut" })
+        .to("#scene-planner", { opacity: 1, duration: 0.8 }, "<")
+        .call(() => showSubtitle("Instant checklists & regulations."))
+        
+        // Cursor moves to "Regulations"
+        .to("#cursor", { x: "32vw", y: "74vh", duration: 0.8, ease: "power2.inOut" })
+        .to("#action-regulations", { backgroundColor: "#f3e8ff", scale: 1.05, duration: 0.2 }) // Hover
+        .to("#action-regulations", { scale: 0.95, duration: 0.1 }) // Click
+        .to("#action-regulations", { scale: 1, duration: 0.1 })
+        
+        // Simulate AI Response
+        .to("#chat-messages", { scrollTo: { y: "max" }, duration: 0.5 })
+        .add(() => {
+            const chatContainer = document.getElementById('chat-messages');
+            const userMsg = document.createElement('div');
+            userMsg.className = 'flex gap-4 justify-end opacity-0 transform translate-y-4';
+            userMsg.innerHTML = `<div class="bg-brand-purple-500 text-white p-4 rounded-2xl rounded-tr-none shadow-md max-w-md">What are the regulations for Japan?</div><div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xl flex-shrink-0">👤</div>`;
+            chatContainer.appendChild(userMsg);
+            gsap.to(userMsg, { opacity: 1, y: 0, duration: 0.3 });
+        })
+        .to({}, { duration: 0.5 }) // Wait
+        .add(() => {
+            const chatContainer = document.getElementById('chat-messages');
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'flex gap-4 opacity-0 transform translate-y-4';
+            aiMsg.innerHTML = `
+                <div class="w-10 h-10 bg-brand-purple-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">🤖</div>
+                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-md text-gray-700 space-y-2">
+                    <p class="font-bold text-brand-purple-600">🇯🇵 Japan Entry Requirements:</p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> Microchip (ISO 11784/11785)</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> Rabies Vaccination (2 shots)</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> FAVN Antibody Test</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> 180-day Waiting Period</li>
+                    </ul>
+                </div>
+            `;
+            chatContainer.appendChild(aiMsg);
+            lucide.createIcons();
+            gsap.to(aiMsg, { opacity: 1, y: 0, duration: 0.4, ease: "back.out" });
+        })
+        .call(() => hideSubtitle(), null, "+=1.5")
+
+        // 4. Scene 4: Community (14s - 19s)
+        .to("#scene-planner", { scale: 0.8, opacity: 0, duration: 0.8, ease: "power2.in" })
+        .to("#scene-community", { opacity: 1, duration: 0.8 }, "<+0.2")
+        .call(() => showSubtitle("Connect with pet parents worldwide."))
+        
+        // Stagger in cards
+        .from(".post-card", { 
+              y: 100, 
+              opacity: 0, 
+              duration: 0.8, 
+              stagger: 0.2, 
+              ease: "power2.out",
+              onComplete: () => {
+                  gsap.set('.post-card', { clearProps: 'all' });
+                  document.querySelectorAll('.post-card').forEach(el => {
+                      el.classList.add('transition-all', 'duration-300');
+                  });
+              }
+        }, "<")
+        
+        // Cursor interaction on card
+        .to("#cursor", { x: "50vw", y: "50vh", duration: 1, ease: "power2.inOut" })
+        .to(".post-card:nth-child(2)", { 
+              scale: 1.05, 
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              borderColor: "#c084fc",
+              duration: 0.3 
+        })
+        .to(".post-card:nth-child(2) i[data-lucide='heart']", { 
+              fill: "#ec4899", 
+              stroke: "#ec4899", 
+              scale: 1.2, 
+              duration: 0.2 
+        })
+        .to(".post-card:nth-child(2) i[data-lucide='heart']", { scale: 1, duration: 0.1 })
+        .call(() => hideSubtitle(), null, "+=1")
+
+        // 5. Scene 5: Infinite Ending (19s - 24s)
+        .to("#scene-community", { opacity: 0, duration: 0.5 })
+        .to("#scene-infinite", { opacity: 1, duration: 0.5 }, "<")
+        .call(() => showSubtitle("Pawsport: Smooth Journeys for Every Pet."))
+        
+        // Zoom out infinite grid
+        .fromTo("#infinite-grid", 
+            { scale: 3, opacity: 0 }, 
+            { scale: 1, opacity: 0.2, duration: 3, ease: "power2.out" }
+        )
+        .from("#scene-infinite .absolute", { scale: 0.8, opacity: 0, duration: 1, ease: "back.out(1.5)" }, "-=2")
+        .to("#subtitle-overlay", { opacity: 0, delay: 2 });
+
+
+        // Start Logic
+        startBtn.addEventListener('click', () => {
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(e => console.log("Audio play failed", e));
+
+            gsap.to("#start-screen", { 
+                y: "-100%", 
+                duration: 1, 
+                ease: "power3.inOut",
+                onComplete: () => {
+                    tl.play();
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
