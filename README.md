@@ -1,8 +1,7 @@
 # 🐾 Pawsport – AI-Powered Pet Travel Assistant
 
-[![Hackathon Ready](https://img.shields.io/badge/Hackathon-Ready-orange.svg)](https://github.com/yourusername/Pawsport)
+[![Hackathon Ready](https://img.shields.io/badge/Hackathon-Ready-orange.svg)](https://devpost.com/software/nosebooper)
 [![Powered by AI](https://img.shields.io/badge/AI-Powered-purple.svg)](https://openai.com/)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone)
 
 **For every pet who deserves a smooth journey—and a friend to boop at the end.**
 
@@ -48,7 +47,7 @@ Travel is better with friends. The "Nose Booper" connects you with:
 
 ---
 
-## 🏗️ Built With AI: The Hackathon Experience
+## 🏗️ Built With AI
 
 Pawsport is not just an AI product; it's an **AI-native project**. We leveraged cutting-edge generative tools to accelerate every stage of development:
 
