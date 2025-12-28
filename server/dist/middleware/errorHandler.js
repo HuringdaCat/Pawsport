@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.errorHandler = void 0;
 const errorHandler = (err, req, res, next) => {
     console.error(err.stack);
     res.status(err.status || 500).json({
@@ -7,4 +8,5 @@ const errorHandler = (err, req, res, next) => {
         error: process.env.NODE_ENV === 'development' ? err : {},
     });
 };
-exports.default = errorHandler;
+exports.errorHandler = errorHandler;
+exports.default = exports.errorHandler;

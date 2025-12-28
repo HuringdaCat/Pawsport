@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
-import { User, Mail, MapPin, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Mail, MapPin, FileText, AlertCircle, CheckCircle, Plus, Trash2, PawPrint } from 'lucide-react';
 import supabase from '../config/supabase';
 
 interface UserProfile {
@@ -11,6 +11,14 @@ interface UserProfile {
   bio: string;
   location: string;
   avatar_url: string;
+}
+
+interface Pet {
+  id?: string;
+  name: string;
+  species: string;
+  breed: string;
+  age: number | string;
 }
 
 const Profile: React.FC = () => {
@@ -25,10 +33,19 @@ const Profile: React.FC = () => {
     location: '',
     avatar_url: ''
   });
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [showAddPet, setShowAddPet] = useState(false);
+  const [newPet, setNewPet] = useState<Pet>({
+    name: '',
+    species: '',
+    breed: '',
+    age: ''
+  });
 
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchPets();
     }
   }, [user]);
 
@@ -57,6 +74,23 @@ const Profile: React.FC = () => {
       setError('Failed to load profile');
     } finally {
       setLoadingProfile(false);
+    }
+  };
+
+  const fetchPets = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('pets')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data) setPets(data);
+    } catch (err: any) {
+      console.error('Error fetching pets:', err);
     }
   };
 
@@ -93,6 +127,54 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleAddPet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('pets')
+        .insert({
+          user_id: user.id,
+          name: newPet.name,
+          species: newPet.species,
+          breed: newPet.breed,
+          age: newPet.age ? parseInt(newPet.age.toString()) : null
+        });
+
+      if (error) throw error;
+
+      setSuccess('Pet added successfully!');
+      setNewPet({ name: '', species: '', breed: '', age: '' });
+      setShowAddPet(false);
+      fetchPets();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to add pet');
+    }
+  };
+
+  const handleDeletePet = async (petId: string) => {
+    if (!window.confirm('Are you sure you want to remove this pet?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('pets')
+        .delete()
+        .eq('id', petId);
+
+      if (error) throw error;
+
+      setSuccess('Pet removed successfully!');
+      fetchPets();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to remove pet');
+    }
+  };
+
   if (loadingProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -103,7 +185,8 @@ const Profile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-purple-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* User Profile Card */}
         <Card className="p-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
@@ -144,7 +227,7 @@ const Profile: React.FC = () => {
             <div>
               <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-2">
                 <User className="w-4 h-4 inline mr-2" />
-                Display Name
+                Your Name
               </label>
               <Input
                 id="displayName"
@@ -196,6 +279,148 @@ const Profile: React.FC = () => {
               </Button>
             </div>
           </form>
+        </Card>
+
+        {/* Pets Section */}
+        <Card className="p-8">
+          <div className="mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <PawPrint className="w-6 h-6 text-brand-orange-500" />
+                  My Pets
+                </h2>
+                <p className="text-gray-600">Manage your furry friends</p>
+              </div>
+              <Button
+                onClick={() => setShowAddPet(!showAddPet)}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Pet
+              </Button>
+            </div>
+          </div>
+
+          {/* Add Pet Form */}
+          {showAddPet && (
+            <form onSubmit={handleAddPet} className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
+              <h3 className="font-semibold text-gray-900">Add New Pet</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="petName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Pet Name *
+                  </label>
+                  <Input
+                    id="petName"
+                    type="text"
+                    value={newPet.name}
+                    onChange={(e) => setNewPet({ ...newPet, name: e.target.value })}
+                    placeholder="Buddy"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="species" className="block text-sm font-medium text-gray-700 mb-1">
+                    Species *
+                  </label>
+                  <Input
+                    id="species"
+                    type="text"
+                    value={newPet.species}
+                    onChange={(e) => setNewPet({ ...newPet, species: e.target.value })}
+                    placeholder="Dog, Cat, etc."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="breed" className="block text-sm font-medium text-gray-700 mb-1">
+                    Breed
+                  </label>
+                  <Input
+                    id="breed"
+                    type="text"
+                    value={newPet.breed}
+                    onChange={(e) => setNewPet({ ...newPet, breed: e.target.value })}
+                    placeholder="Golden Retriever"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
+                    Age (years)
+                  </label>
+                  <Input
+                    id="age"
+                    type="number"
+                    value={newPet.age}
+                    onChange={(e) => setNewPet({ ...newPet, age: e.target.value })}
+                    placeholder="3"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button type="submit" size="sm">
+                  Add Pet
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setShowAddPet(false);
+                    setNewPet({ name: '', species: '', breed: '', age: '' });
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {/* Pets List */}
+          {pets.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <PawPrint className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <p>No pets added yet</p>
+              <p className="text-sm">Click "Add Pet" to get started</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pets.map((pet) => (
+                <div
+                  key={pet.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-gray-900">{pet.name}</h3>
+                      <p className="text-sm text-gray-600">{pet.species}</p>
+                      {pet.breed && (
+                        <p className="text-sm text-gray-500">{pet.breed}</p>
+                      )}
+                      {pet.age && (
+                        <p className="text-xs text-gray-500 mt-1">{pet.age} years old</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleDeletePet(pet.id!)}
+                      className="text-red-500 hover:text-red-700 p-1"
+                      title="Remove pet"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
     </div>

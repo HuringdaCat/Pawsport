@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RegulationService = void 0;
 class RegulationService {
     constructor() {
         this.regulations = [];
@@ -23,4 +24,4 @@ class RegulationService {
         return this.regulations;
     }
 }
-exports.default = new RegulationService();
+exports.RegulationService = RegulationService;

@@ -10,6 +10,7 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [petName, setPetName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,10 +38,15 @@ const Register: React.FC = () => {
       return;
     }
 
+    if (petName.trim().length < 2) {
+      setError("Pet name must be at least 2 characters long");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { error } = await signUp(email, password, displayName);
+      const { error } = await signUp(email, password, displayName, petName);
       
       if (error) {
         setError(error.message || 'Failed to create account');
@@ -91,14 +97,29 @@ const Register: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">
-                Display Name
+                Your Name
               </label>
               <Input
                 id="displayName"
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your name"
+                placeholder="John Doe"
+                required
+                disabled={loading || success}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="petName" className="block text-sm font-medium text-gray-700 mb-1">
+                Pet's Name
+              </label>
+              <Input
+                id="petName"
+                type="text"
+                value={petName}
+                onChange={(e) => setPetName(e.target.value)}
+                placeholder="Buddy"
                 required
                 disabled={loading || success}
               />

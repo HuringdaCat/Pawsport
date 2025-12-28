@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { PawPrint, User, LogOut } from 'lucide-react';
 import { Button } from '../ui';
 import { useAuth } from '../../contexts/AuthContext';
+import NotificationBell from './NotificationBell';
 
 const Header: React.FC = () => {
     const { user, signOut } = useAuth();
@@ -39,6 +40,7 @@ const Header: React.FC = () => {
                         
                         {user ? (
                             <div className="flex items-center gap-4">
+                                <NotificationBell />
                                 <Link to="/profile" className="hidden md:flex items-center gap-2 text-sm text-gray-600 hover:text-brand-orange-600 transition-colors">
                                     <User className="w-4 h-4" />
                                     <span>Profile</span>
