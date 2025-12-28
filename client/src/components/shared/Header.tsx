@@ -1,9 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PawPrint } from 'lucide-react';
+import { PawPrint, User, LogOut } from 'lucide-react';
 import { Button } from '../ui';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Header: React.FC = () => {
+    const { user, signOut } = useAuth();
+
+    const handleLogout = async () => {
+        await signOut();
+    };
+
     return (
         <header className="bg-white shadow-sm sticky top-0 z-50">
             <nav className="max-w-7xl mx-auto px-6 py-4 md:px-12">
@@ -29,11 +36,37 @@ const Header: React.FC = () => {
                         <Link to="/community" className="text-gray-700 hover:text-brand-orange-600 transition-colors font-medium hidden md:block">
                             Community
                         </Link>
-                        <Link to="/travel-planner">
-                            <Button size="sm">
-                                Get Started
-                            </Button>
-                        </Link>
+                        
+                        {user ? (
+                            <div className="flex items-center gap-4">
+                                <Link to="/profile" className="hidden md:flex items-center gap-2 text-sm text-gray-600 hover:text-brand-orange-600 transition-colors">
+                                    <User className="w-4 h-4" />
+                                    <span>Profile</span>
+                                </Link>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    <span className="hidden md:inline">Logout</span>
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3">
+                                <Link to="/login">
+                                    <Button size="sm" variant="outline">
+                                        Login
+                                    </Button>
+                                </Link>
+                                <Link to="/register">
+                                    <Button size="sm">
+                                        Sign Up
+                                    </Button>
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </nav>
