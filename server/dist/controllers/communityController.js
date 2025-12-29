@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const communityService_1 = require("../services/communityService");
 const supabase_1 = require("../config/supabase");
+// Import middleware to get type extensions
+require("../middleware/auth");
 class CommunityController {
     constructor() {
         this.communityService = new communityService_1.CommunityService();

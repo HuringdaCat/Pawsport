@@ -133,8 +133,16 @@ export const deleteComment = async (commentId) => {
 // Function to get user notifications
 export const getNotifications = async (unreadOnly = false) => {
     try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+            return [];
+        }
+        
         const response = await api.get('/notifications', { 
-            params: { unreadOnly } 
+            params: { 
+                unreadOnly,
+                userId: session.user.id
+            } 
         });
         return response.data;
     } catch (error) {
@@ -145,7 +153,14 @@ export const getNotifications = async (unreadOnly = false) => {
 // Function to get unread notification count
 export const getUnreadNotificationCount = async () => {
     try {
-        const response = await api.get('/notifications/unread-count');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+            return 0;
+        }
+        
+        const response = await api.get('/notifications/unread-count', {
+            params: { userId: session.user.id }
+        });
         return response.data.count;
     } catch (error) {
         throw new Error('Error fetching unread count: ' + error.message);
@@ -155,7 +170,17 @@ export const getUnreadNotificationCount = async () => {
 // Function to mark notification as read
 export const markNotificationAsRead = async (notificationId) => {
     try {
-        await api.put(`/notifications/${notificationId}/read`);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+            throw new Error('Not authenticated');
+        }
+        
+        await api.put(`/notifications`, {
+            params: { 
+                id: notificationId,
+                userId: session.user.id
+            }
+        });
     } catch (error) {
         throw new Error('Error marking notification as read: ' + error.message);
     }
@@ -164,7 +189,16 @@ export const markNotificationAsRead = async (notificationId) => {
 // Function to mark all notifications as read
 export const markAllNotificationsAsRead = async () => {
     try {
-        await api.put('/notifications/read-all');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+            throw new Error('Not authenticated');
+        }
+        
+        // For now, fetch all unread and mark them one by one
+        const unreadNotifs = await getNotifications(true);
+        await Promise.all(
+            unreadNotifs.map(notif => markNotificationAsRead(notif.id))
+        );
     } catch (error) {
         throw new Error('Error marking all notifications as read: ' + error.message);
     }
@@ -173,7 +207,17 @@ export const markAllNotificationsAsRead = async () => {
 // Function to delete a notification
 export const deleteNotification = async (notificationId) => {
     try {
-        await api.delete(`/notifications/${notificationId}`);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+            throw new Error('Not authenticated');
+        }
+        
+        await api.delete(`/notifications`, {
+            params: {
+                id: notificationId,
+                userId: session.user.id
+            }
+        });
     } catch (error) {
         throw new Error('Error deleting notification: ' + error.message);
     }
