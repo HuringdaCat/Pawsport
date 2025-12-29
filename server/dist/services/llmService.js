@@ -12,46 +12,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCulturalNotes = exports.explainDocuments = exports.getRegulationSummary = exports.getTravelChecklist = void 0;
+exports.LLMService = void 0;
 const axios_1 = __importDefault(require("axios"));
 const LLM_API_URL = 'https://api.example.com/llm'; // Replace with actual LLM API URL
-const getTravelChecklist = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield axios_1.default.post(`${LLM_API_URL}/travel-checklist`, params);
-        return response.data;
+class LLMService {
+    getTravelChecklist(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield axios_1.default.post(`${LLM_API_URL}/travel-checklist`, params);
+                return response.data;
+            }
+            catch (error) {
+                throw new Error('Error fetching travel checklist: ' + error.message);
+            }
+        });
     }
-    catch (error) {
-        throw new Error('Error fetching travel checklist: ' + error.message);
+    getRegulationSummary(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield axios_1.default.post(`${LLM_API_URL}/regulation-summary`, params);
+                return response.data;
+            }
+            catch (error) {
+                throw new Error('Error fetching regulation summary: ' + error.message);
+            }
+        });
     }
-});
-exports.getTravelChecklist = getTravelChecklist;
-const getRegulationSummary = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield axios_1.default.post(`${LLM_API_URL}/regulation-summary`, params);
-        return response.data;
+    explainDocuments(documents) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield axios_1.default.post(`${LLM_API_URL}/document-explainer`, { documents });
+                return response.data;
+            }
+            catch (error) {
+                throw new Error('Error explaining documents: ' + error.message);
+            }
+        });
     }
-    catch (error) {
-        throw new Error('Error fetching regulation summary: ' + error.message);
+    getCulturalNotes(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield axios_1.default.post(`${LLM_API_URL}/cultural-notes`, params);
+                return response.data;
+            }
+            catch (error) {
+                throw new Error('Error fetching cultural notes: ' + error.message);
+            }
+        });
     }
-});
-exports.getRegulationSummary = getRegulationSummary;
-const explainDocuments = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield axios_1.default.post(`${LLM_API_URL}/document-explainer`, params);
-        return response.data;
-    }
-    catch (error) {
-        throw new Error('Error explaining documents: ' + error.message);
-    }
-});
-exports.explainDocuments = explainDocuments;
-const getCulturalNotes = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield axios_1.default.post(`${LLM_API_URL}/cultural-notes`, params);
-        return response.data;
-    }
-    catch (error) {
-        throw new Error('Error fetching cultural notes: ' + error.message);
-    }
-});
-exports.getCulturalNotes = getCulturalNotes;
+}
+exports.LLMService = LLMService;
+exports.default = new LLMService();

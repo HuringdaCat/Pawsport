@@ -1,5 +1,7 @@
 # 🐾 Pawsport – AI-Powered Pet Travel Assistant
 
+> 📚 **Documentation**: All guides and implementation summaries are now in the [`docs/`](docs/) folder
+
 [![Hackathon Ready](https://img.shields.io/badge/Hackathon-Ready-orange.svg)](https://devpost.com/software/nosebooper)
 [![Powered by AI](https://img.shields.io/badge/AI-Powered-purple.svg)](https://openai.com/)
 

@@ -30,8 +30,14 @@ export interface Regulation {
 export interface CommunityPost {
     id: string;
     userId: string;
+    authorName: string;
     content: string;
+    route?: string;
+    petTypes?: string[];
+    likes: number;
+    commentCount: number;
     createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface PetProfile {
@@ -49,4 +55,25 @@ export interface User {
     username: string;
     email: string;
     pets: PetProfile[];
+}
+
+export interface Comment {
+    id: string;
+    postId: string;
+    userId: string;
+    authorName: string;
+    content: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface Notification {
+    id: string;
+    userId: string;
+    type: 'comment' | 'like' | 'reply';
+    title: string;
+    message: string;
+    link?: string;
+    read: boolean;
+    createdAt: Date;
 }

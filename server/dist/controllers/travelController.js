@@ -20,7 +20,7 @@ class TravelController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { origin, destination, species, breed, vaccinationStatus } = req.body;
-                const checklist = yield this.regulationService.generateChecklist(origin, destination, species, breed, vaccinationStatus);
+                const checklist = yield this.llmService.getTravelChecklist({ origin, destination, species, breed, vaccinationStatus });
                 res.status(200).json(checklist);
             }
             catch (error) {
@@ -31,8 +31,8 @@ class TravelController {
     getRegulationSummary(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { origin, destination } = req.params;
-                const summary = yield this.regulationService.getRegulationSummary(origin, destination);
+                const { country } = req.params;
+                const summary = this.regulationService.getRegulationSummary(country);
                 res.status(200).json(summary);
             }
             catch (error) {
