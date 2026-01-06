@@ -13,11 +13,47 @@ class TravelController {
 
     public async getTravelChecklist(req: Request, res: Response): Promise<void> {
         try {
-            const { origin, destination, species, breed, vaccinationStatus } = req.body;
-            const checklist = await this.llmService.getTravelChecklist({ origin, destination, species, breed, vaccinationStatus });
-            res.status(200).json(checklist);
-        } catch (error) {
-            res.status(500).json({ message: 'Error generating travel checklist', error });
+            console.log('=== Travel Checklist Request ===');
+            console.log('Body:', req.body);
+            console.log('OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
+            
+            const { origin, destination, species, breed, vaccinationStatus, travelDate } = req.body;
+            
+            const result = await this.llmService.getTravelChecklist({ 
+                origin, 
+                destination, 
+                species, 
+                breed, 
+                vaccinationStatus,
+                travelDate 
+            });
+            
+            console.log('Result valid:', result.valid);
+            console.log('Warnings:', result.warnings);
+            
+            if (result.valid && result.plan) {
+                res.status(200).json({
+                    success: true,
+                    plan: result.plan
+                });
+            } else {
+                res.status(200).json({
+                    success: false,
+                    warnings: result.warnings,
+                    message: 'Failed to generate a valid travel plan. Please try again or contact support.'
+                });
+            }
+        } catch (error: any) {
+            console.error('=== Travel Checklist Error ===');
+            console.error('Error:', error);
+            console.error('Message:', error.message);
+            console.error('Stack:', error.stack);
+            
+            res.status(500).json({ 
+                success: false,
+                message: 'Error generating travel checklist', 
+                error: error.message 
+            });
         }
     }
 

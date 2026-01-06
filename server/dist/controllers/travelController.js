@@ -19,12 +19,35 @@ class TravelController {
     getTravelChecklist(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { origin, destination, species, breed, vaccinationStatus } = req.body;
-                const checklist = yield this.llmService.getTravelChecklist({ origin, destination, species, breed, vaccinationStatus });
-                res.status(200).json(checklist);
+                const { origin, destination, species, breed, vaccinationStatus, travelDate } = req.body;
+                const result = yield this.llmService.getTravelChecklist({
+                    origin,
+                    destination,
+                    species,
+                    breed,
+                    vaccinationStatus,
+                    travelDate
+                });
+                if (result.valid && result.plan) {
+                    res.status(200).json({
+                        success: true,
+                        plan: result.plan
+                    });
+                }
+                else {
+                    res.status(200).json({
+                        success: false,
+                        warnings: result.warnings,
+                        message: 'Failed to generate a valid travel plan. Please try again or contact support.'
+                    });
+                }
             }
             catch (error) {
-                res.status(500).json({ message: 'Error generating travel checklist', error });
+                res.status(500).json({
+                    success: false,
+                    message: 'Error generating travel checklist',
+                    error: error.message
+                });
             }
         });
     }
