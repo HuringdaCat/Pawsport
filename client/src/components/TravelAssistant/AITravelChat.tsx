@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { StructuredTravelPlan } from '../../types';
+import StructuredPlanView from './StructuredPlanView';
+import PlanValidationWarning from './PlanValidationWarning';
 import './AITravelChat.css';
 
 interface Message {
@@ -25,10 +28,13 @@ const AITravelChat: React.FC = () => {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [structuredPlan, setStructuredPlan] = useState<StructuredTravelPlan | null>(null);
+    const [planWarnings, setPlanWarnings] = useState<string[] | null>(null);
+    const [showPlanError, setShowPlanError] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const quickActions: QuickAction[] = [
-        { label: 'Travel Checklist', prompt: 'Help me create a travel checklist for my pet', icon: '✓' },
+        { label: 'Travel Checklist', prompt: 'Create a travel checklist for my dog from New York to London', icon: '✓' },
         { label: 'Regulations', prompt: 'What are the travel regulations I need to know?', icon: '📋' },
         { label: 'Documents', prompt: 'Explain the required documents for pet travel', icon: '📄' },
         { label: 'Timeline', prompt: 'What\'s the preparation timeline for pet travel?', icon: '⏰' }
@@ -41,6 +47,47 @@ const AITravelChat: React.FC = () => {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    const generateStructuredPlan = async (userInput: string) => {
+        try {
+            const response = await fetch('/api/travel/checklist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    origin: 'New York',
+                    destination: 'London',
+                    species: 'dog',
+                    breed: 'Labrador',
+                    vaccinationStatus: 'up-to-date',
+                    travelDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate travel plan');
+            }
+
+            const data = await response.json();
+            
+            if (data.success && data.plan) {
+                setStructuredPlan(data.plan);
+                setPlanWarnings(null);
+                setShowPlanError(false);
+                return true;
+            } else {
+                setPlanWarnings(data.warnings || ['Unknown error occurred']);
+                setShowPlanError(true);
+                return false;
+            }
+        } catch (error) {
+            console.error('Error generating plan:', error);
+            setPlanWarnings(['Failed to connect to the AI service. Please try again.']);
+            setShowPlanError(true);
+            return false;
+        }
+    };
 
     const sendMessage = async (text: string) => {
         if (!text.trim() || isLoading) return;
@@ -56,8 +103,36 @@ const AITravelChat: React.FC = () => {
         setInput('');
         setIsLoading(true);
 
+        // Check if this is a checklist/plan request
+        const isPlanRequest = text.toLowerCase().includes('checklist') || 
+                              text.toLowerCase().includes('plan') ||
+                              text.toLowerCase().includes('timeline');
+
+        if (isPlanRequest) {
+            const success = await generateStructuredPlan(text);
+            
+            if (success) {
+                const aiMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'assistant',
+                    content: '✅ I\'ve generated a personalized travel plan for you! Check out the timeline and checklist below.',
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, aiMessage]);
+            } else {
+                const errorMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'assistant',
+                    content: '❌ I encountered some issues generating your plan. Please see the warnings below and try again.',
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, errorMessage]);
+            }
+            setIsLoading(false);
+            return;
+        }
+
         try {
-            // Convert messages to API format
             const apiMessages = [...messages, userMessage].map(msg => ({
                 role: msg.role,
                 content: msg.content
@@ -115,6 +190,34 @@ const AITravelChat: React.FC = () => {
         }
     };
 
+    const handleRetry = () => {
+        setShowPlanError(false);
+        setPlanWarnings(null);
+        sendMessage('Create a travel checklist for my pet');
+    };
+
+    if (structuredPlan) {
+        return (
+            <div className="ai-travel-chat-container">
+                <StructuredPlanView 
+                    plan={structuredPlan} 
+                    warnings={planWarnings || undefined}
+                    onRetry={handleRetry}
+                />
+                <button 
+                    className="back-to-chat-button"
+                    onClick={() => {
+                        setStructuredPlan(null);
+                        setPlanWarnings(null);
+                        setShowPlanError(false);
+                    }}
+                >
+                    ← Back to Chat
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="ai-travel-chat">
             <div className="chat-header">
@@ -126,6 +229,14 @@ const AITravelChat: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {showPlanError && planWarnings && (
+                <PlanValidationWarning 
+                    warnings={planWarnings} 
+                    onRetry={handleRetry}
+                    onDismiss={() => setShowPlanError(false)}
+                />
+            )}
 
             <div className="chat-messages">
                 {messages.map((message) => (

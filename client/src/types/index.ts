@@ -76,3 +76,48 @@ export interface Notification {
     read: boolean;
     createdAt: Date;
 }
+
+// Structured Travel Plan Types
+export interface TimelineTask {
+    id: string;
+    title: string;
+    description: string;
+    completed: boolean;
+}
+
+export interface TimelineItem {
+    id: string;
+    title: string;
+    date: string;
+    daysBeforeTravel: number;
+    tasks: TimelineTask[];
+    category: 'veterinary' | 'documentation' | 'booking' | 'preparation';
+}
+
+export interface ChecklistTask {
+    id: string;
+    title: string;
+    description: string;
+    completed: boolean;
+    priority: 'high' | 'medium' | 'low';
+    category: 'veterinary' | 'documentation' | 'booking' | 'preparation';
+    estimatedDuration?: string;
+}
+
+export interface StructuredTravelPlan {
+    origin: string;
+    destination: string;
+    species: string;
+    breed: string;
+    travelDate: string;
+    timeline: TimelineItem[];
+    checklist: ChecklistTask[];
+    regulationSummary: string;
+    criticalAlerts: string[];
+}
+
+export interface PlanValidationResult {
+    valid: boolean;
+    warnings: string[];
+    plan?: StructuredTravelPlan;
+}
